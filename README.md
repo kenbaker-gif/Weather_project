@@ -73,7 +73,7 @@ curl "http://127.0.0.1:8000/weather?location=Kampala"
   "temperature": 28.5,
 
   "humidity": 70,
-  
+
   "description": "clear sky"
 }
 
@@ -137,17 +137,17 @@ curl http://127.0.0.1:8000/weather_records
 
 ### Basic commands:
 
-.tables                 -- list all tables 
+- .tables                 -- list all tables 
 
-.schema weather         -- show table structure
+- .schema weather         -- show table structure
 
-.headers on             -- display column headers 
+- .headers on             -- display column headers 
 
-.mode column            -- pretty-print output
+- .mode column            -- pretty-print output
 
-SELECT * FROM weather;  -- show all records
+- SELECT * FROM weather;  -- show all records
 
-.exit                   -- exit SQLite CLI 
+- .exit                   -- exit SQLite CLI 
 
 
-Note: Make a backup before using UPDATE or DELETE.
+## Note: Make a backup before using UPDATE or DELETE.
