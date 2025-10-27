@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Weather App</title>
+    <link rel="stylesheet" href="../static/style.css">
+</head>
+<body>
+    <h1>Weather App</h1>
+    <form id="weatherForm">
+        <input type="text" id="location" placeholder="Enter city or zip code">
+        <button type="submit">Get Weather</button>
+    </form>
+    <div id="result"></div>
+
+    <script>
+        const form = document.getElementById("weatherForm");
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const loc = document.getElementById("location").value;
+            const res = await fetch(`http://127.0.0.1:8000/weather?location=${loc}`);
+            const data = await res.json();
+            document.getElementById("result").innerText = JSON.stringify(data, null, 2);
+        });
+    </script>
+</body>
+</html>
