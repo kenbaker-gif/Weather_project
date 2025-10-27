@@ -2,25 +2,61 @@
 <html>
 <head>
     <title>Weather App</title>
-    <link rel="stylesheet" href="../static/style.css">
+    <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-    <h1>Weather App</h1>
-    <form id="weatherForm">
-        <input type="text" id="location" placeholder="Enter city or zip code">
-        <button type="submit">Get Weather</button>
-    </form>
-    <div id="result"></div>
+    <div class="container">
+        <h1>Weather App</h1>
+
+        <form id="weatherForm">
+            <input type="text" id="location" placeholder="Enter city or zip code" required>
+            <button type="submit">Get & Save Weather</button>
+        </form>
+
+        <h2>Weather Result</h2>
+        <pre id="result">No weather fetched yet.</pre>
+
+        <h2>Saved Records</h2>
+        <button id="refreshRecords">Refresh Records</button>
+        <pre id="savedRecords">No records yet.</pre>
+    </div>
 
     <script>
         const form = document.getElementById("weatherForm");
+
         form.addEventListener("submit", async (e) => {
             e.preventDefault();
-            const loc = document.getElementById("location").value;
-            const res = await fetch(`http://127.0.0.1:8000/weather?location=${loc}`);
-            const data = await res.json();
-            document.getElementById("result").innerText = JSON.stringify(data, null, 2);
+            const loc = document.getElementById("location").value.trim();
+            if (!loc) return alert("Please enter a location");
+
+            try {
+                // Fetch weather AND save to DB automatically
+                const res = await fetch(`/weather?location=${encodeURIComponent(loc)}&save=true`);
+                const data = await res.json();
+                document.getElementById("result").innerText = JSON.stringify(data, null, 2);
+
+                // Refresh saved records automatically
+                refreshRecords();
+            } catch (err) {
+                document.getElementById("result").innerText = "Error fetching/saving weather: " + err;
+            }
         });
+
+        // Function to refresh saved records
+        async function refreshRecords() {
+            try {
+                const res = await fetch(`/weather_records`);
+                const data = await res.json();
+                document.getElementById("savedRecords").innerText = JSON.stringify(data, null, 2);
+            } catch (err) {
+                document.getElementById("savedRecords").innerText = "Error fetching records: " + err;
+            }
+        }
+
+        document.getElementById("refreshRecords").addEventListener("click", refreshRecords);
+
+        // Load saved records on page load
+        window.addEventListener("load", refreshRecords);
     </script>
 </body>
 </html>

@@ -1,153 +1,133 @@
-# Weather App – AI/ML Internship Project
-## Project Overview
+# 🌤️ Weather App – AI/ML Internship Project
 
-This Weather App allows users to:
+## 📋 Project Overview
 
-- Fetch real-time weather for any location (city, zip code, or landmark)
+This Weather App enables users to:
 
-- Store weather data in a database
+* 🔍 Fetch real-time weather for any location (city, zip code, or landmark)
+* 💾 Automatically save fetched weather to a database
+* ⚡ Perform basic CRUD operations on stored weather records
+* 📊 View saved records instantly on the frontend
 
-- Perform basic CRUD operations (Create, Read, Update, Delete) on stored weather records
+### 🛠️ Tech Stack
+- Python
+- FastAPI
+- SQLAlchemy (SQLite)
+- OpenWeatherMap API
+- Jinja2 templates
 
-Tech Stack: Python, FastAPI, SQLAlchemy (SQLite), OpenWeatherMap API
-
-Requirements
+## 📥 Requirements
 
 - Python 3.9+
-
 - pip package manager
-
 - OpenWeatherMap API key
 
-Install dependencies:
+### Installation
 
-* pip install -r requirements.txt
+```bash
+pip install -r requirements.txt
+```
 
-
-* Set your API key in config.py:
-
+Configure your API key in `config.py`:
+```python
 API_KEY = "YOUR_OPENWEATHERMAP_API_KEY"
+```
 
+> 📝 Note: SQLite database (weather.db) is automatically created on first run.
 
-SQLite database (weather.db) is automatically created on first run.
+## 🚀 Running the App
 
-Running the App
+Start the FastAPI server:
+```bash
+uvicorn main:app --reload
+```
 
-- Start the FastAPI server:
+- 🌐 Server URL: http://127.0.0.1:8000
+- 📚 Swagger UI (API docs): http://127.0.0.1:8000/docs
 
-- uvicorn main:app --reload
+## 🔌 API Endpoints
 
-
-Server URL: http://127.0.0.1:8000
-
-Swagger UI (interactive API docs): http://127.0.0.1:8000/docs
-
-### API Endpoints
-1️⃣ Home
-
-URL: /
-Method: GET
-Description: Welcome message
-
+### 1️⃣ Home Page
+- **URL**: `/`
+- **Method**: GET
+- **Description**: Loads the HTML page with the weather form
+```bash
 curl http://127.0.0.1:8000/
+```
 
+### 2️⃣ Fetch Current Weather
+- **URL**: `/weather`
+- **Method**: GET
+- **Parameters**:
+  - `location`: city name, zip code, or landmark
+  - `save`: true to save the record (optional)
 
-### Response:
+```bash
+curl "http://127.0.0.1:8000/weather?location=Kampala&save=true"
+```
 
-{"message": "Welcome to the Weather API!"}
-
-2️⃣ Fetch Current Weather
-
-### URL: /weather
-Method: GET
-Query Parameter: location = city name, zip code, or landmark
-
-curl "http://127.0.0.1:8000/weather?location=Kampala"
-
-
-### Sample Response:
-
+#### Sample Response:
+```json
 {
-  "location": "Kampala",
-
-  "temperature": 28.5,
-
-  "humidity": 70,
-
-  "description": "clear sky"
-}
-
-3️⃣ Save Weather Record
-
-URL: /weather_record
-Method: POST
-Query Parameter: location = city name, zip code, or landmark
-
-curl -X POST "http://127.0.0.1:8000/weather_record?location=Kampala"
-
-
-### Sample Response:
-
-{
-  "id": 1,
-
-  "location": "Kampala",
-
-  "date": "2025-10-27",
-
-  "temperature": 28.5,
-
-  "humidity": 70,
-
-  "description": "clear sky"
-}
-
-4️⃣ List All Stored Records
-
-URL: /weather_records
-Method: GET
-
-curl http://127.0.0.1:8000/weather_records
-
-
-### Sample Response:
-
-[
-  {
-    "id": 1,
-
+  "weather": {
     "location": "Kampala",
-
-    "date": "2025-10-27",
-
     "temperature": 28.5,
-
     "humidity": 70,
-
+    "description": "clear sky"
+  },
+  "saved": {
+    "id": 1,
+    "location": "Kampala",
+    "date": "2025-10-27",
+    "temperature": 28.5,
+    "humidity": 70,
     "description": "clear sky"
   }
-]
+}
+```
 
-### Inspect Database via CLI
+### 3️⃣ Save Weather Record
+- **URL**: `/weather_record`
+- **Method**: POST
+- **Parameter**: `location`
 
-- Open terminal in project folder:
+```bash
+curl -X POST "http://127.0.0.1:8000/weather_record?location=Kampala"
+```
 
-- sqlite3 weather.db
+### 4️⃣ List All Stored Records
+- **URL**: `/weather_records`
+- **Method**: GET
 
+```bash
+curl http://127.0.0.1:8000/weather_records
+```
 
-### Basic commands:
+## 💻 Database Management
 
-- .tables                 -- list all tables 
+### CLI Access
+```bash
+sqlite3 weather.db
+```
 
-- .schema weather         -- show table structure
+### Useful Commands
+```sql
+.tables                 -- list all tables
+.schema weather        -- show table structure
+.headers on           -- display column headers
+.mode column          -- pretty-print output
+SELECT * FROM weather; -- show all records
+.exit                 -- exit SQLite CLI
+```
 
-- .headers on             -- display column headers 
+> ⚠️ **Important**: Always backup before using UPDATE or DELETE operations.
 
-- .mode column            -- pretty-print output
+## 🖥️ Frontend Usage
 
-- SELECT * FROM weather;  -- show all records
+1. Enter a location in the input field
+2. Click "Get & Save Weather"
+3. View weather info and automatic database save
+4. Browse saved records below (refreshable)
 
-- .exit                   -- exit SQLite CLI 
-
-
-## Note: Make a backup before using UPDATE or DELETE.
+---
+*Made with ❤️ during AI/ML Internship*
