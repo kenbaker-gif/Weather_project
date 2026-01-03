@@ -4,3 +4,4 @@ requests
 sqlalchemy
 pandas
 geopy
+python-dotenv
