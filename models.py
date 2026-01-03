@@ -1,12 +1,12 @@
-from sqlalchemy import Column, Integer, String, Float, Date
-from database import Base
+from sqlalchemy import Column, Integer, String, Float, DateTime
+from datetime import datetime
 
 class WeatherRecord(Base):
-    __tablename__ = "weather"
-
+    __tablename__ = "weather_records"
     id = Column(Integer, primary_key=True, index=True)
-    location = Column(String, nullable=False)
-    date = Column(Date, nullable=False)
-    temperature = Column(Float, nullable=False)
-    humidity = Column(Float, nullable=False)
-    description = Column(String, nullable=False)
+    location = Column(String)
+    # Change Date to DateTime
+    date = Column(DateTime, default=datetime.utcnow) 
+    temperature = Column(Float)
+    humidity = Column(Integer)
+    description = Column(String)
