@@ -1,10 +1,10 @@
 import streamlit as st
-from datetime import date
+from datetime import datetime
+import pytz
 import sys
 from pathlib import Path
 
 # --- Path Management ---
-# This ensures that crud, database, and utils are findable by the Cloud environment
 file_path = Path(__file__).resolve()
 project_root = file_path.parent.parent 
 if str(project_root) not in sys.path:
@@ -17,8 +17,10 @@ from database import SessionLocal, engine
 from utils.utils import get_weather
 
 # --- Initialization ---
-# This line creates the tables in Supabase if they don't exist yet
 models.Base.metadata.create_all(bind=engine)
+
+# Configure Timezone for Uganda
+local_tz = pytz.timezone("Africa/Kampala")
 
 # Fetch API Key from Streamlit Secrets
 API_KEY = st.secrets["API_KEY"]
@@ -27,19 +29,16 @@ st.set_page_config(page_title="Weather Dashboard", page_icon="🌤️")
 st.title("🌤️ Weather Dashboard")
 
 # --- Input Section ---
-location = st.text_input("Enter city:", placeholder="e.g. London, Nairobi, New York")
+location = st.text_input("Enter city:", placeholder="e.g. London, Nairobi, Kampala")
 
 # --- Get Weather Logic ---
 if st.button("Get Weather"):
     if location:
-        # We pass the API_KEY directly into the utility function
         weather = get_weather(location, API_KEY)
         
         if "error" in weather:
-            # Displays the actual error (e.g., "city not found" or "invalid api key")
             st.error(f"Error: {weather.get('message', 'Location not found')}")
         else:
-            # Store in session state to persist across button clicks
             st.session_state["weather"] = weather
             st.session_state["current_location"] = location
             
@@ -56,17 +55,20 @@ if "weather" in st.session_state:
         weather = st.session_state["weather"]
         loc_name = st.session_state["current_location"]
         
+        # Capture current time in Uganda
+        now_uganda = datetime.now(local_tz)
+        
         db = SessionLocal()
         try:
             record = create_weather_record(
                 db,
                 loc_name,
-                date.today(),
+                now_uganda, # Passes the full timestamp with hour/min/sec
                 weather["temperature"],
                 weather["humidity"],
                 weather["description"]
             )
-            st.success(f"✅ Saved to Supabase (ID: {record.id})")
+            st.success(f"✅ Saved to Supabase at {now_uganda.strftime('%I:%M %p')} EAT")
         except Exception as e:
             st.error(f"Failed to save: {e}")
         finally:
@@ -79,17 +81,19 @@ if st.checkbox("Show Search History from Database"):
     try:
         records = read_weather_records(db)
         if records:
-            # Convert SQLAlchemy objects to a list of dicts for a clean table
-            data = [
-                {
-                    "ID": r.id, 
+            # Format data for display
+            data = []
+            for r in records:
+                # If r.date is a string, we parse it; if it's a datetime object, we just format it
+                display_time = r.date.strftime("%d %b, %Y | %I:%M %p") if hasattr(r.date, 'strftime') else r.date
+                
+                data.append({
                     "Location": r.location, 
-                    "Date": r.date, 
-                    "Temp": r.temperature, 
-                    "Humidity": r.humidity, 
-                    "Desc": r.description
-                } for r in records
-            ]
+                    "Time (EAT)": display_time, 
+                    "Temp (°C)": r.temperature, 
+                    "Humidity (%)": r.humidity, 
+                    "Description": r.description.capitalize()
+                })
             st.dataframe(data, use_container_width=True)
         else:
             st.info("No records found in the database yet.")
