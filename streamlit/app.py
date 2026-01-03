@@ -99,5 +99,48 @@ if st.checkbox("Show Search History from Database"):
             st.info("No records found in the database yet.")
     except Exception as e:
         st.error(f"Could not fetch records: {e}")
+
+# --- Historical Data Section ---
+st.divider()
+if st.checkbox("Show Search History from Database"):
+    db = SessionLocal()
+    try:
+        records = read_weather_records(db)
+        if records:
+            data = []
+            # Define timezones
+            utc_tz = pytz.utc
+            uganda_tz = pytz.timezone("Africa/Kampala")
+
+            for r in records:
+                # 1. Take the database time and tell Python it is UTC
+                # If r.date already has timezone info, we use it; otherwise, we assign UTC
+                if r.date.tzinfo is None:
+                    utc_dt = utc_tz.localize(r.date)
+                else:
+                    utc_dt = r.date
+
+                # 2. Convert that UTC time to Uganda Local Time (EAT)
+                uganda_dt = utc_dt.astimezone(uganda_tz)
+                
+                # 3. Format for the table
+                formatted_time = uganda_dt.strftime("%d %b, %Y | %I:%M %p")
+                
+                data.append({
+                    "Location": r.location, 
+                    "Time (EAT)": formatted_time, 
+                    "Temp (°C)": r.temperature, 
+                    "Humidity (%)": r.humidity, 
+                    "Description": r.description.capitalize()
+                })
+            
+            # Sort data so newest searches appear at the top
+            data.reverse() 
+            st.dataframe(data, use_container_width=True)
+        else:
+            st.info("No records found in the database yet.")
+    except Exception as e:
+        st.error(f"Could not fetch records: {e}")
     finally:
-        db.close()
+    db.close()
+
