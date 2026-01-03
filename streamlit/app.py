@@ -55,7 +55,7 @@ if "weather" in st.session_state:
         weather = st.session_state["weather"]
         loc_name = st.session_state["current_location"]
         
-        # Capture current time in Uganda
+        # Capture current time in Uganda (EAT)
         now_uganda = datetime.now(local_tz)
         
         db = SessionLocal()
@@ -63,7 +63,7 @@ if "weather" in st.session_state:
             record = create_weather_record(
                 db,
                 loc_name,
-                now_uganda, # Passes the full timestamp with hour/min/sec
+                now_uganda, 
                 weather["temperature"],
                 weather["humidity"],
                 weather["description"]
@@ -74,33 +74,7 @@ if "weather" in st.session_state:
         finally:
             db.close()
 
-# --- Historical Data Section ---
-st.divider()
-if st.checkbox("Show Search History from Database"):
-    db = SessionLocal()
-    try:
-        records = read_weather_records(db)
-        if records:
-            # Format data for display
-            data = []
-            for r in records:
-                # If r.date is a string, we parse it; if it's a datetime object, we just format it
-                display_time = r.date.strftime("%d %b, %Y | %I:%M %p") if hasattr(r.date, 'strftime') else r.date
-                
-                data.append({
-                    "Location": r.location, 
-                    "Time (EAT)": display_time, 
-                    "Temp (°C)": r.temperature, 
-                    "Humidity (%)": r.humidity, 
-                    "Description": r.description.capitalize()
-                })
-            st.dataframe(data, use_container_width=True)
-        else:
-            st.info("No records found in the database yet.")
-    except Exception as e:
-        st.error(f"Could not fetch records: {e}")
-
-# --- Historical Data Section ---
+# --- Historical Data Section (Cleaned & Single Version) ---
 st.divider()
 if st.checkbox("Show Search History from Database"):
     db = SessionLocal()
@@ -108,22 +82,20 @@ if st.checkbox("Show Search History from Database"):
         records = read_weather_records(db)
         if records:
             data = []
-            # Define timezones
             utc_tz = pytz.utc
             uganda_tz = pytz.timezone("Africa/Kampala")
 
             for r in records:
-                # 1. Take the database time and tell Python it is UTC
-                # If r.date already has timezone info, we use it; otherwise, we assign UTC
+                # 1. Localize the database time as UTC
                 if r.date.tzinfo is None:
                     utc_dt = utc_tz.localize(r.date)
                 else:
                     utc_dt = r.date
 
-                # 2. Convert that UTC time to Uganda Local Time (EAT)
+                # 2. Convert to Kampala time (EAT)
                 uganda_dt = utc_dt.astimezone(uganda_tz)
                 
-                # 3. Format for the table
+                # 3. Format for display
                 formatted_time = uganda_dt.strftime("%d %b, %Y | %I:%M %p")
                 
                 data.append({
@@ -134,7 +106,7 @@ if st.checkbox("Show Search History from Database"):
                     "Description": r.description.capitalize()
                 })
             
-            # Sort data so newest searches appear at the top
+            # Newest records at the top
             data.reverse() 
             st.dataframe(data, use_container_width=True)
         else:
@@ -142,5 +114,4 @@ if st.checkbox("Show Search History from Database"):
     except Exception as e:
         st.error(f"Could not fetch records: {e}")
     finally:
-    db.close()
-
+        db.close()
