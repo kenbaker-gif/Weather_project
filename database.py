@@ -1,21 +1,28 @@
-import os
 import streamlit as st
 from sqlalchemy import create_engine
 from sqlalchemy.engine import URL
 from sqlalchemy.orm import sessionmaker, declarative_base
 from sqlalchemy.pool import NullPool
 
-# Build the connection parameters safely
-# This avoids the "int(components['port'])" error entirely
+# --- Secure Secret Retrieval ---
+# We pull these from st.secrets instead of hardcoding them
+db_user = st.secrets["DB_USER"]
+db_password = st.secrets["DB_PASSWORD"]
+db_host = st.secrets["DB_HOST"]
+db_port = int(st.secrets["DB_PORT"])
+db_name = st.secrets["DB_NAME"]
+
+# Build the connection parameters safely using the URL object
 connection_url = URL.create(
     drivername="postgresql",
-    username="postgres.qavpzacavbxlsyaavhyy",
-    password="_K6#5HtSi!%msUD", # Use your REAL password here, NO encoding!
-    host="aws-1-eu-north-1.pooler.supabase.com",
-    port=6543,
-    database="postgres",
+    username=db_user,
+    password=db_password,
+    host=db_host,
+    port=db_port,
+    database=db_name,
 )
 
+# --- Engine Configuration ---
 engine = create_engine(
     connection_url,
     poolclass=NullPool,
@@ -24,8 +31,6 @@ engine = create_engine(
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
-
-# ... rest of your get_db() function
 
 def get_db():
     db = SessionLocal()
