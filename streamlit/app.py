@@ -13,6 +13,8 @@ sys.path.append(str(project_root))
 from crud import create_weather_record, read_weather_records
 from database import SessionLocal  # use direct session instead of get_db()
 from utils.utils import get_weather
+import streamlit as st
+API_KEY = st.secrets["API_KEY"]
 
 st.title("Weather Dashboard")
 
