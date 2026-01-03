@@ -1,5 +1,21 @@
-# Configuration file
-# Store API keys and database URL here
+import os
+from dotenv import load_dotenv
 
-API_KEY = "b67972bf44194d108e7f4090b0486421"  # Replace with your OpenWeatherMap key
-DATABASE_URL = "sqlite:///weather.db"    # SQLite database file
+load_dotenv()
+
+# Weather API
+API_KEY = os.getenv("API_KEY")
+
+# PostgreSQL
+DB_HOST = os.getenv("DB_HOST")
+DB_PORT = os.getenv("DB_PORT")
+DB_NAME = os.getenv("DB_NAME")
+DB_USER = os.getenv("DB_USER")
+DB_PASSWORD = os.getenv("DB_PASSWORD")  # must exist in .env
+DB_OPTIONS = os.getenv("DB_OPTIONS", "")  # should be ?sslmode=require
+
+DATABASE_URL = (
+    f"postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}"
+    f"@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+    f"{DB_OPTIONS}"  # ONLY this, do NOT append API_KEY
+)

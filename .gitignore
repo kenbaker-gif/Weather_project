@@ -1,2 +1,4 @@
 weather.db
 __pycache__
+debug
+.env
